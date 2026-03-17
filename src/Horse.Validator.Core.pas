@@ -77,11 +77,11 @@ type
 
     // --- Execução ---
 
-    /// <summary>
-    ///   Executa todo o processo de validação.
-    ///   Levanta EHorseValidationException em caso de falha.
-    /// </summary>
+    /// <summary>Executa todo o processo de validação. Levanta EHorseValidationException em caso de falha.</summary>
     procedure Validate;
+
+    /// <summary>JSON mestre de validação. Contém todos os valores e chaves da requisição, usados para validação.</summary>
+    function GetMasterJSON: TJSONObject;
   end;
 
 implementation
@@ -119,6 +119,7 @@ end;
 procedure THorseValidator.BuildMasterJSON;
 var
   LJSONBody: TJSONValue;
+  LContentField: TPair<string, string>;
 begin
   FMasterJSON := TJSONObject.Create;
 
@@ -138,6 +139,13 @@ begin
     // ou cria um objeto vazio se estiver vazio.
     if FRequest.Body.IsEmpty then
       FMasterJSON.AddPair('body', TJSONNull.Create)
+    else if FRequest.ContentFields.Count > 0 then
+    begin
+      LJSONBody := TJSONObject.Create;
+      for LContentField in FRequest.ContentFields.ToArray do
+        TJSONObject(LJSONBody).AddPair(LContentField.Key, LContentField.Value);
+      FMasterJSON.AddPair('body', LJSONBody);
+    end
     else
       FMasterJSON.AddPair('body', FRequest.Body);
   end;
@@ -249,6 +257,11 @@ begin
   finally
     FCurrentContext := LPreviousContext;
   end;
+end;
+
+function THorseValidator.GetMasterJSON: TJSONObject;
+begin
+  Result := FMasterJSON;
 end;
 
 function THorseValidator.GetSingleValue(const APath: string): string;

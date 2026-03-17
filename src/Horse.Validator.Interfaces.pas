@@ -3,7 +3,7 @@ unit Horse.Validator.Interfaces;
 interface
 
 uses
-  System.SysUtils;
+  System.SysUtils, System.JSON;
 
 type
   // Declaração antecipada para uso nos callbacks
@@ -76,6 +76,9 @@ type
     ///   Levanta EHorseValidationException em caso de falha.
     /// </summary>
     procedure Validate;
+
+    /// <summary>JSON mestre de validação. Contém todos os valores e chaves da requisição, usados para validação.</summary>
+    function GetMasterJSON: TJSONObject;
   end;
 
 implementation
